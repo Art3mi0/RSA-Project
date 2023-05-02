@@ -126,15 +126,16 @@ def RSAGen():
     # print("e = " + (32-len(binE))*"0" + binE)
     # print("d = " + (32-len(binD))*"0" + binD)
 
-for i in range(50):
+count = 0
+table = []
+for i in range(1000):
     sentence = "Attempt " + str(i + 1) + ": "
     start = time.perf_counter()
     n, e, d = RSAGen()
     end = time.perf_counter()
-    print(sentence + str(end - start))
+    table.append(end - start)
     encrypt = FastExponentiationNoTables.expMod(69, e, n)
     decrypt = FastExponentiationNoTables.expMod(encrypt, d, n)
     if decrypt != 69:
-        print("Failed to properly decrypt \n")
-    else:
-        print("Properly decrypted \n")
+        count += 1
+print("The average time to generate keys is", (sum(table) / len(table)), "with", count, "bad keys")
