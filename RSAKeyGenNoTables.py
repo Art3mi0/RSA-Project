@@ -67,7 +67,7 @@ def primalityTest(x, e, n):
     else:
         return True
 
-def RSAGen():
+def RSAGen(bits):
     goAgain = True
     while goAgain:  # For the extremely rare case not a single e has an inverse
         # Initializing Variables
@@ -77,13 +77,13 @@ def RSAGen():
         # Generating random bits
         while q == 0:
             passedTest = False
-            myNum = secrets.randbits(512)
+            myNum = secrets.randbits(bits)
             myNum1 = myNum - 1
             numTests = 1
 
             # Miller-Rabin Test begins
             for i in range(numTests):  # was 20
-                a = random.randint(2, myNum1)
+                a = secrets.randbelow(myNum1 - 2) + 2   # Needs to be between 2 and n
                 result = primalityTest(a, myNum1, myNum)
                 if (result) and (i == numTests - 1):
                     passedTest = True
@@ -127,15 +127,17 @@ def RSAGen():
     # print("d = " + (32-len(binD))*"0" + binD)
 
 count = 0
-table = []
-for i in range(1000):
-    sentence = "Attempt " + str(i + 1) + ": "
+print("Bit # \t time")
+for i in range(248, 1025):
     start = time.perf_counter()
-    n, e, d = RSAGen()
+    n, e, d = RSAGen(i)
     end = time.perf_counter()
-    table.append(end - start)
     encrypt = FastExponentiationNoTables.expMod(69, e, n)
     decrypt = FastExponentiationNoTables.expMod(encrypt, d, n)
     if decrypt != 69:
         count += 1
-print("The average time to generate keys is", (sum(table) / len(table)), "with", count, "bad keys")
+    print(str(i) + "\t" + str(end - start))
+
+print(count, "total number of bad keys")
+
+# The average time to generate keys is 0.6556628711999991 with 0 bad keys in 1000 tries
