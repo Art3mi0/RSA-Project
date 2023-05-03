@@ -152,7 +152,7 @@ def isPrime(n, k):
 
     return True;
 
-def RSAGen(bits):
+def RSAGen(bits, numTests):
     goAgain = True
     while goAgain:  # For the extremely rare case not a single e has an inverse
         # Initializing Variables
@@ -164,7 +164,6 @@ def RSAGen(bits):
             passedTest = False
             myNum = secrets.randbits(bits)
             myNum1 = myNum - 1
-            numTests = 1
 
             result = isPrime(myNum, numTests)
             if result:
@@ -206,19 +205,18 @@ def RSAGen(bits):
     # print("e = " + (32-len(binE))*"0" + binE)
     # print("d = " + (32-len(binD))*"0" + binD)
 
+total = 0
 count = 0
-print("Bit # \t time")
-for i in range(248, 1025):
-    start = time.perf_counter()
-    n, e, d = RSAGen(i)
-    end = time.perf_counter()
+while True:
+    total += 1
+    n, e, d = RSAGen(128, 1)
     encrypt = FastExponentiationNoTables.expMod(69, e, n)
     decrypt = FastExponentiationNoTables.expMod(encrypt, d, n)
     if decrypt != 69:
         count += 1
-    print(str(i) + "\t" + str(end - start))
-
-print(count, "total number of bad keys")
+        print(count, "total number of bad keys. Last one at try", total)
+    if (total % 10000) == 0:
+        print("Attempt so far:", total)
 
 # The average time to generate keys is 0.6556628711999991 with 0 bad keys in 1000 tries
 # https://www.geeksforgeeks.org/primality-test-set-3-miller-rabin/
