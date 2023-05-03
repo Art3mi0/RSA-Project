@@ -45,11 +45,11 @@ def euclidExtended(m, n):
     return t1, x
 
 #RSA Fermat
-def FermatPrimalityTest(number):
+def FermatPrimalityTest(number, tries):
     ''' if number != 1 '''
     if (number > 1):
         ''' repeat the test few times '''
-        for time in range(1):
+        for time in range(tries):
             ''' Draw a RANDOM number in range of number ( Z_number )  '''
             randomNumber = secrets.randbelow(number-2) + 2
 
@@ -86,7 +86,7 @@ def primalityTest(x, e, n):
     else:
         return True
 
-def RSAGen(bits):
+def RSAGen(bits, tries):
     goAgain = True
     while goAgain:  # For the extremely rare case not a single e has an inverse
         # Initializing Variables
@@ -97,13 +97,14 @@ def RSAGen(bits):
         while q == 0:
             passedTest = False
             myNum = secrets.randbits(bits)
+            mynum = 1105
             myNum1 = myNum - 1
             numTests = 1
 
             # Miller-Rabin Test begins
             #for i in range(numTests):  # was 20
                 #a = random.randint(2, myNum1)
-            result = FermatPrimalityTest(myNum)
+            result = FermatPrimalityTest(myNum, tries)
 
             if result:
                 if p == 0:
@@ -144,19 +145,17 @@ def RSAGen(bits):
     # print("e = " + (32-len(binE))*"0" + binE)
     # print("d = " + (32-len(binD))*"0" + binD)
 
+total = 0
 count = 0
-print("Bit # \t time")
-for i in range(248, 1025):
-    start = time.perf_counter()
-    n, e, d = RSAGen(i)
-    end = time.perf_counter()
+while True:
+    total += 1
+    n, e, d = RSAGen(128, 1)
     encrypt = FastExponentiationNoTables.expMod(69, e, n)
     decrypt = FastExponentiationNoTables.expMod(encrypt, d, n)
     if decrypt != 69:
         count += 1
-    print(str(i) + "\t" + str(end - start))
-
-print(count, "total number of bad keys")
-
+        print(count, "total number of bad keys. Last one at try", total)
+    if (total % 10000) == 0:
+        print("Attempt so far:", total)
 
 #The average time to generate keys is 0.4218328512000001 with 0 bad keys
